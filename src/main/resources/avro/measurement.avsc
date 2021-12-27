@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "namespace": "org.example.model.avro",
+  "name": "Measurement",
+  "version": "1",
+  "fields": [
+    {
+      "name": "type",
+      "type": "string",
+      "doc": "type of measurement"
+    },
+    {
+      "name": "value",
+      "type": "double",
+      "doc": "measurement value"
+    },
+    {
+      "name": "device",
+      "type": "string",
+      "doc": "measurement value"
+    },
+    {
+      "name": "timestamp",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "namespace": "org.example.model.avro",
+  "name": "CountAndSum",
+  "version" : "1",
+  "fields": [
+    { "name": "count", "type": "int", "doc": "type of measurement" },
+    { "name": "sum", "type": "double", "doc": "measurement value" }
+  ]
+}

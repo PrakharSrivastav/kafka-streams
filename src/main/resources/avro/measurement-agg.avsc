@@ -1,0 +1,47 @@
+{
+  "type": "record",
+  "namespace": "org.example.model.avro",
+  "name": "MeasurementAggregate",
+  "version": "1",
+  "fields": [
+    {
+      "name": "timestamp",
+      "type": "string",
+      "doc": "something"
+    },
+    {
+      "name": "deviceA",
+      "type": {
+        "name": "DeviceInfo",
+        "fields": [
+          {
+            "name": "value",
+            "type": "double"
+          },
+          {
+            "name": "device",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "type": "string"
+          },
+          {
+            "name": "avgFreq",
+            "type": "double",
+            "default": 0.0
+          }
+        ],
+        "type": "record"
+      }
+    },
+    {
+      "name": "deviceB",
+      "type": "org.example.model.avro.DeviceInfo"
+    },
+    {
+      "name": "deviceC",
+      "type": "org.example.model.avro.DeviceInfo"
+    }
+  ]
+}
