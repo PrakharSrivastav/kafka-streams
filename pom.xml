@@ -14,10 +14,10 @@
     <name>demo</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <java.version>11</java.version>
-        <avro.version>1.8.2</avro.version>
+        <java.version>17</java.version>
+        <avro.version>1.11.0</avro.version>
         <confluent.version>5.0.0</confluent.version>
-        <avro.version>1.8.2</avro.version>
+
     </properties>
 
 
@@ -87,6 +87,20 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.16.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.16.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

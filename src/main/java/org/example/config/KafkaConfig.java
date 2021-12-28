@@ -13,6 +13,7 @@ import org.example.model.avro.Measurement;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
@@ -30,6 +31,7 @@ import static org.apache.kafka.streams.StreamsConfig.*;
 @Configuration
 @EnableKafka
 @EnableKafkaStreams
+@Profile("!test")
 public class KafkaConfig {
 
 
