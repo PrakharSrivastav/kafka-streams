@@ -12,6 +12,7 @@ import org.example.model.avro.DeviceInfo;
 import org.example.model.avro.Measurement;
 import org.example.model.avro.MeasurementAggregate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -26,24 +27,30 @@ public class MeasurementStream {
 
     private static final Serde<String> STRING_SERDE = Serdes.String();
 
+    private final NewTopic topic1;
+    private final NewTopic topic2;
+    private final Map<String, String> serdeConfig;
+
     @Autowired
-    private NewTopic topic1;
-    @Autowired
-    private NewTopic topic2;
-    @Autowired
+    public MeasurementStream(NewTopic topic1, NewTopic topic2,
+                             @Qualifier("serdeConfig") Map<String, String> serdeConfig) {
+        this.topic1 = topic1;
+        this.topic2 = topic2;
+        this.serdeConfig = serdeConfig;
+    }
+    /*@Autowired
     private NewTopic deviceA;
     @Autowired
     private NewTopic deviceB;
     @Autowired
     private NewTopic deviceC;
     @Autowired
-    private NewTopic avgTopic;
+    private NewTopic avgTopic;*/
 
 
     @Autowired
-    void buildPipeline(StreamsBuilder streamsBuilder) {
+    public void buildPipeline(StreamsBuilder streamsBuilder) {
 
-        final Map<String, String> serdeConfig = Collections.singletonMap("schema.registry.url", "http://0.0.0.0:8081");
         final Serde<Measurement> mmSerde = new SpecificAvroSerde<>();
         mmSerde.configure(serdeConfig, false);
 
@@ -51,14 +58,12 @@ public class MeasurementStream {
         aggSerde.configure(serdeConfig, false);
 
 
-        var filteredFreq = streamsBuilder
-            .stream(topic1.name(), Consumed.with(STRING_SERDE, mmSerde));
-
         AtomicInteger count = new AtomicInteger();
-        filteredFreq
+        streamsBuilder
+            .stream(topic1.name(), Consumed.with(STRING_SERDE, mmSerde))
             .map((k, v) -> new KeyValue<>(v.getTimestamp().toString(), v))
             .groupByKey(Grouped.with(Serdes.String(), mmSerde))
-            .windowedBy(TimeWindows.ofSizeAndGrace(Duration.ofMillis(1000), Duration.ofMillis(100)))
+            .windowedBy(TimeWindows.ofSizeAndGrace(Duration.ofMillis(1000),Duration.ofMillis(10)))
             .aggregate((Initializer<List<Measurement>>) ArrayList::new
                 , (key, value, aggregate) -> {
                     aggregate.add(value);
@@ -66,11 +71,11 @@ public class MeasurementStream {
                 }
                 , Materialized.with(Serdes.String(), Serdes.ListSerde(ArrayList.class, mmSerde))
             )
-            .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.maxRecords(80L).withNoBound()))
-            //.filter((key, value) -> (((List<Measurement>) value).size()) == 3)
+            .suppress(Suppressed.untilWindowCloses( Suppressed.BufferConfig.maxRecords(100L).withNoBound()))
+            .filter((key, value) -> (((List<Measurement>) value).size()) == 3)
             .mapValues((readOnlyKey, value) -> this.aggregateIt((List<Measurement>) value))
             .toStream()
-            //.peek((key, value) -> System.out.printf("%d %s %n", count.getAndIncrement(), value.toString()));
+            .peek((key, value) -> System.out.printf("%d %s %n", count.getAndIncrement(), value.toString()))
             .selectKey((key, value) -> key.toString())
             .to(topic2.name());
     }
@@ -108,7 +113,7 @@ public class MeasurementStream {
             .mapValues((readOnlyKey, value) -> value.getSum() / value.getCount())
             .toStream()
             .selectKey((key, value) -> key.toString());
-            //.peek((key, value) -> System.out.printf("avg freq  key: %s : %s %n", key, value.toString()));
+        //.peek((key, value) -> System.out.printf("avg freq  key: %s : %s %n", key, value.toString()));
 
         stream.leftJoin(avgStream,
                 (ValueJoiner<MeasurementAggregate, Double, MeasurementAggregate>) (agg, avg) -> {
@@ -118,7 +123,6 @@ public class MeasurementStream {
                 },
                 JoinWindows.of(Duration.ofSeconds(3)))
             .peek((key, value) -> System.out.printf("avg freq  key: %s : %s %n", key, value.toString()));
-        ;
     }
 
 

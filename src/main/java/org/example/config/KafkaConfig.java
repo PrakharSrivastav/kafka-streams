@@ -23,6 +23,7 @@ import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,35 +53,36 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic topic2() {
-        var t = new NewTopic("measurement-freq-only", 1, (short) 1);
-        return t;
+        return new NewTopic("measurement-freq-only", 1, (short) 1);
     }
 
     @Bean
     public NewTopic avgTopic() {
-        var t = new NewTopic("measurement-freq-avg", 1, (short) 1);
-        return t;
+        return new NewTopic("measurement-freq-avg", 1, (short) 1);
     }
 
 
     @Bean
     public NewTopic deviceA() {
-        var t = new NewTopic("device-a", 1, (short) 1);
-        return t;
+        return new NewTopic("device-a", 1, (short) 1);
     }
 
     @Bean
     public NewTopic deviceB() {
-        var t = new NewTopic("device-b", 1, (short) 1);
-        return t;
+        return new NewTopic("device-b", 1, (short) 1);
     }
 
     @Bean
     public NewTopic deviceC() {
-        var t = new NewTopic("device-c", 1, (short) 1);
-        return t;
+        return new NewTopic("device-c", 1, (short) 1);
     }
 
+
+    @Bean(name = "serdeConfig")
+    public Map<String,String> serdeConfig(){
+        return
+            Collections.singletonMap("schema.registry.url", "http://0.0.0.0:8081");
+    }
     @Bean
     public ProducerFactory<String, Measurement> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -93,7 +95,7 @@ public class KafkaConfig {
 
     @Bean
     public KafkaTemplate<String, Measurement> kafkaTemplate() {
-        return new KafkaTemplate<String, Measurement>(producerFactory());
+        return new KafkaTemplate<>(producerFactory());
     }
 
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
